@@ -100,7 +100,11 @@ export function MediaPreviewModal({
   const handleCopyLink = async () => {
     if (!activeAsset) return;
     try {
-      await navigator.clipboard.writeText(activeAsset.url);
+      const absoluteUrl = activeAsset.url.startsWith("http")
+        ? activeAsset.url
+        : `${window.location.origin}${activeAsset.url}`;
+
+      await navigator.clipboard.writeText(absoluteUrl);
       toast.success("链接已复制", {
         description: "图片地址已复制到剪贴板",
       });

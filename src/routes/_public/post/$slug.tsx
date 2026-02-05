@@ -97,8 +97,16 @@ function RouteComponent() {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground/60 tracking-wider">
               <span className="flex items-center gap-1.5">
+                发布于:{" "}
                 <ClientOnly fallback={<span>-</span>}>
                   {formatDate(post.publishedAt)}
+                </ClientOnly>
+              </span>
+              <span className="opacity-30">/</span>
+              <span className="flex items-center gap-1.5">
+                最后更新:{" "}
+                <ClientOnly fallback={<span>-</span>}>
+                  {formatDate(post.updatedAt)}
                 </ClientOnly>
               </span>
               <span className="opacity-30">/</span>
@@ -132,15 +140,17 @@ function RouteComponent() {
             </h1>
           </div>
 
-          <div className="bg-muted/30 rounded-lg p-6 space-y-3 border border-border/40">
-            <div className="flex items-center gap-2 text-muted-foreground/80 font-medium text-sm uppercase tracking-widest">
-              <Sparkles className="w-4 h-4" />
-              <span>摘要</span>
+          {post.summary && (
+            <div className="bg-muted/30 rounded-lg p-6 space-y-3 border border-border/40">
+              <div className="flex items-center gap-2 text-muted-foreground/80 font-medium text-sm uppercase tracking-widest">
+                <Sparkles className="w-4 h-4" />
+                <span>摘要</span>
+              </div>
+              <p className="text-lg leading-relaxed text-muted-foreground font-serif">
+                {post.summary}
+              </p>
             </div>
-            <p className="text-lg leading-relaxed text-muted-foreground font-serif">
-              {post.summary}
-            </p>
-          </div>
+          )}
         </header>
 
         {/* Content Layout */}

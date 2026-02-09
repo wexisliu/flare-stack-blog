@@ -107,7 +107,7 @@ export const createRateLimitMiddleware = (
       const session = context.session;
 
       const identifier =
-        session?.user.id || getRequestHeader("cf-connecting-ip") || "unknown";
+        getRequestHeader("cf-connecting-ip") || session?.user.id || "unknown";
       const scope = options.key || "default";
       const uniqueIdentifier = `${identifier}:${scope}`;
 

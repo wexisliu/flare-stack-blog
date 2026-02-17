@@ -4,6 +4,8 @@
 
 [部署指南](#部署指南) | [本地开发](#本地开发)
 
+> 建了个tg群，欢迎来技术交流👏 [Telegram 群](https://t.me/+vWuQYybv1kgxMDkx)
+
 基于 Cloudflare Workers 的现代化全栈博客 CMS。
 
 ![首页](docs/assets/home.png)
@@ -188,6 +190,20 @@ cp wrangler.example.jsonc wrangler.jsonc
 # 启动开发服务器
 bun dev
 ```
+
+### 登录管理后台
+
+**方式一：邮箱密码注册（无需第三方服务）**
+
+1. 访问 `http://localhost:3000` 注册页面，使用 `.dev.vars` 中配置的 `ADMIN_EMAIL` 注册账号
+2. 开发环境下验证邮件不会真正发送，验证链接会打印到控制台，复制访问即可完成验证
+3. 验证后自动登录，系统根据 `ADMIN_EMAIL` 自动赋予管理员权限
+
+**方式二：GitHub OAuth**
+
+1. 前往 [GitHub Developer Settings](https://github.com/settings/developers) 创建一个 OAuth App
+2. Homepage URL 填 `http://localhost:3000`，Authorization callback URL 填 `http://localhost:3000/api/auth/callback/github`
+3. 将 Client ID 和 Client Secret 填入 `.dev.vars`
 
 ### 常用命令
 

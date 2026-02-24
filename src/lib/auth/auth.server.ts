@@ -21,16 +21,7 @@ async function checkEmailRateLimit(
   return result.allowed;
 }
 
-let auth: Auth | null = null;
-
 export function getAuth({ db, env }: { db: DB; env: Env }) {
-  if (auth) return auth;
-
-  auth = createAuth({ db, env });
-  return auth;
-}
-
-function createAuth({ db, env }: { db: DB; env: Env }) {
   const {
     BETTER_AUTH_SECRET,
     BETTER_AUTH_URL,
@@ -39,9 +30,11 @@ function createAuth({ db, env }: { db: DB; env: Env }) {
     GITHUB_CLIENT_SECRET,
   } = serverEnv(env);
 
-  // 每次请求随机 DO 实例，避免 CPU 密集型哈希操作串行
+  // 固定 10 个 DO 实例池，随机选择避免冷启动
+  const PASSWORD_HASHER_POOL_SIZE = 10;
   function getPasswordHasher() {
-    const id = env.PASSWORD_HASHER.idFromName(crypto.randomUUID());
+    const index = Math.floor(Math.random() * PASSWORD_HASHER_POOL_SIZE);
+    const id = env.PASSWORD_HASHER.idFromName(`hasher-${index}`);
     return env.PASSWORD_HASHER.get(id);
   }
 
@@ -130,5 +123,5 @@ function createAuth({ db, env }: { db: DB; env: Env }) {
   });
 }
 
-export type Auth = ReturnType<typeof createAuth>;
+export type Auth = ReturnType<typeof getAuth>;
 export type Session = Auth["$Infer"]["Session"];

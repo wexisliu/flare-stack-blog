@@ -98,7 +98,7 @@ export async function sendEmail(
     console.log(
       `[EMAIL_SERVICE] 开发环境跳过发送至 ${options.to} 的邮件：${options.subject}:\n${options.html}`,
     );
-    return { status: "SUCCESS" as const };
+    return ok({ success: true });
   }
 
   const config = await getSystemConfig(context.db);
@@ -106,29 +106,36 @@ export async function sendEmail(
 
   if (!email?.apiKey || !email.senderAddress) {
     console.warn(`[EMAIL_SERVICE] 未配置邮件服务，跳过发送至: ${options.to}`);
-    return { status: "DISABLED" as const };
+    return err({ reason: "EMAIL_DISABLED" });
   }
 
-  const resend = createEmailClient({ apiKey: email.apiKey });
+  try {
+    const resend = createEmailClient({ apiKey: email.apiKey });
 
-  const result = await resend.emails.send(
-    {
-      from: email.senderName
-        ? `${email.senderName} <${email.senderAddress}>`
-        : email.senderAddress,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      headers: options.headers,
-    },
-    {
-      idempotencyKey: options.idempotencyKey,
-    },
-  );
+    const result = await resend.emails.send(
+      {
+        from: email.senderName
+          ? `${email.senderName} <${email.senderAddress}>`
+          : email.senderAddress,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        headers: options.headers,
+      },
+      {
+        idempotencyKey: options.idempotencyKey,
+      },
+    );
 
-  if (result.error) {
-    return { status: "FAILED" as const, error: result.error.message };
+    if (result.error) {
+      return err({ reason: "SEND_FAILED", message: result.error.message });
+    }
+  } catch (error) {
+    return err({
+      reason: "SEND_FAILED",
+      message: error instanceof Error ? error.message : "未知错误",
+    });
   }
 
-  return { status: "SUCCESS" as const };
+  return ok({ success: true });
 }

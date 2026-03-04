@@ -71,10 +71,10 @@ function UploadModalInternal({
         {/* Header */}
         <div className="px-6 pt-8 pb-4 flex items-start justify-between shrink-0">
           <div className="space-y-2">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/60">
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60">
               [ UPLOAD ]
             </p>
-            <h2 className="text-xl font-serif font-medium text-foreground">
+            <h2 className="text-2xl font-serif font-medium text-foreground">
               上传文件
             </h2>
           </div>
@@ -113,10 +113,10 @@ function UploadModalInternal({
             `}
           >
             <div className="text-center space-y-2">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">
+              <p className="text-xs font-mono uppercase tracking-widest text-foreground">
                 {isDragging ? "松开此处以上传" : "点击或拖拽文件至此"}
               </p>
-              <p className="text-[10px] font-mono text-muted-foreground/60">
+              <p className="text-xs font-mono text-muted-foreground/60">
                 支持 JPEG/JPG/PNG/WEBP/GIF (最大 {maxSizeMb}MB)
               </p>
             </div>
@@ -126,7 +126,7 @@ function UploadModalInternal({
           {queue.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b border-border/30 pb-2">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/60">
+                <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground/60">
                   上传队列 [{queue.length}]
                 </span>
               </div>
@@ -137,7 +137,7 @@ function UploadModalInternal({
                     key={item.id}
                     className="group bg-background p-3 border border-border/30 flex flex-col gap-2 transition-all hover:border-border/60"
                   >
-                    <div className="flex justify-between items-center text-[10px] font-mono">
+                    <div className="flex justify-between items-center text-xs font-mono">
                       <span className="truncate max-w-40 text-foreground font-medium">
                         {item.name}
                       </span>
@@ -160,7 +160,7 @@ function UploadModalInternal({
                       />
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] font-mono tracking-widest mt-1">
+                    <div className="flex justify-between items-center text-xs font-mono tracking-widest mt-1">
                       <div className="flex items-center gap-2">
                         {item.status === "UPLOADING" && (
                           <Loader2
@@ -206,7 +206,7 @@ function UploadModalInternal({
           {queue.length > 0 && !isAllComplete && (
             <button
               onClick={onClose}
-              className="px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground/60 hover:text-foreground transition-colors"
+              className="px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-muted-foreground/60 hover:text-foreground transition-colors"
             >
               后台上传
             </button>
@@ -216,7 +216,7 @@ function UploadModalInternal({
             <button
               onClick={onClose}
               className={`
-                px-6 py-2.5 text-[10px] font-mono uppercase tracking-widest transition-all
+                px-6 py-2.5 text-xs font-mono uppercase tracking-widest transition-all
                 ${
                   hasErrors
                     ? "bg-destructive text-destructive-foreground hover:opacity-80"
@@ -229,7 +229,7 @@ function UploadModalInternal({
           ) : (
             <button
               onClick={onClose}
-              className="px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest text-muted-foreground/60 hover:text-foreground transition-colors"
+              className="px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-muted-foreground/60 hover:text-foreground transition-colors"
             >
               取消
             </button>

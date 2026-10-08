@@ -4,29 +4,38 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getSessionFromCtx } from "better-auth/api";
 import { betterAuth } from "better-auth/minimal";
 import { renderToStaticMarkup } from "react-dom/server";
+import { resolveSiteConfig } from "@/features/config/config.resolve";
+import * as ConfigRepo from "@/features/config/data/config.data";
 import { AuthEmail } from "@/features/email/templates/AuthEmail";
+import {
+  emailSiteOf,
+  type EmailSite,
+} from "@/features/email/templates/email-theme";
 import {
   inspectApiKeyManagementAccess,
   isApiKeyManagementPath,
 } from "@/lib/auth/api-key-guard";
 import { createAuthConfig } from "@/lib/auth/auth.config";
+import { getRateLimiter } from "@/lib/do/rate-limiter-binding";
 import * as authSchema from "@/lib/db/schema/auth.table";
 import { serverEnv } from "@/lib/env/server.env";
 import { m } from "@/paraglide/messages";
 
 async function checkEmailRateLimit(
-  env: Env,
   scope: string,
   email: string,
 ): Promise<boolean> {
   const identifier = `${scope}:${email.toLowerCase().trim()}`;
-  const id = env.RATE_LIMITER.idFromName(identifier);
-  const rateLimiter = env.RATE_LIMITER.get(id);
+  const rateLimiter = await getRateLimiter(identifier);
   const result = await rateLimiter.checkLimit({
     capacity: 3,
     interval: "1h",
   });
   return result.allowed;
+}
+
+async function getEmailSite(db: DB): Promise<EmailSite> {
+  return emailSiteOf(resolveSiteConfig(await ConfigRepo.getSystemConfig(db)));
 }
 
 export function getAuth({ db, env }: { db: DB; env: Env }) {
@@ -53,7 +62,7 @@ export function getAuth({ db, env }: { db: DB; env: Env }) {
             typeof ctx.body?.email === "string" ? ctx.body.email.trim() : "";
           if (!email) return;
 
-          const allowed = await checkEmailRateLimit(env, "email-signup", email);
+          const allowed = await checkEmailRateLimit("email-signup", email);
           if (!allowed) {
             throw APIError.from("BAD_REQUEST", {
               code: "RATE_LIMITED",
@@ -94,15 +103,16 @@ export function getAuth({ db, env }: { db: DB; env: Env }) {
       requireEmailVerification: true,
       sendResetPassword: async ({ user, url }) => {
         // Per-email rate limit: 3 per hour — silently skip if exceeded
-        const allowed = await checkEmailRateLimit(
-          env,
-          "email-reset",
-          user.email,
-        );
+        const allowed = await checkEmailRateLimit("email-reset", user.email);
         if (!allowed) return;
 
         const emailHtml = renderToStaticMarkup(
-          AuthEmail({ locale: LOCALE, type: "reset-password", url }),
+          AuthEmail({
+            locale: LOCALE,
+            site: await getEmailSite(db),
+            type: "reset-password",
+            url,
+          }),
         );
 
         await env.QUEUE.send({
@@ -118,15 +128,16 @@ export function getAuth({ db, env }: { db: DB; env: Env }) {
     emailVerification: {
       sendVerificationEmail: async ({ user, url }) => {
         // Per-email rate limit: 3 per hour — silently skip if exceeded
-        const allowed = await checkEmailRateLimit(
-          env,
-          "email-verify",
-          user.email,
-        );
+        const allowed = await checkEmailRateLimit("email-verify", user.email);
         if (!allowed) return;
 
         const emailHtml = renderToStaticMarkup(
-          AuthEmail({ locale: LOCALE, type: "verification", url }),
+          AuthEmail({
+            locale: LOCALE,
+            site: await getEmailSite(db),
+            type: "verification",
+            url,
+          }),
         );
 
         await env.QUEUE.send({
